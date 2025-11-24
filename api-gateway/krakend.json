@@ -1,0 +1,21 @@
+{
+  "version": 3,
+  "name": "order-processing-gateway",
+  "port": 8080,
+  "tls": {
+    "public_key": "/certs/server.crt",
+    "private_key": "/certs/server.key"
+  },
+  "timeout": "4s",
+  "endpoints": [
+      {
+        "endpoint": "/auth/{everything}",
+        "backend": [
+          {
+            "host": ["http://auth:8081"],
+            "url_pattern": "/auth/{everything}"
+          }
+        ]
+      }
+  ]
+}

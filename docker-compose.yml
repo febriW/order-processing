@@ -34,20 +34,38 @@ services:
       - redis_data:/data
     restart: unless-stopped
 
-  # --- Layanan Aplikasi ---
-  # Pastikan Anda memiliki Dockerfile di setiap direktori layanan
-  api_gateway:
+  # ------------------------------------------
+  # KrakenD API GATEWAY
+  # ------------------------------------------
+  krakend:
     build: ./api-gateway
+    container_name: api_gateway
     ports:
-      - "8080:8080"
+      - "443:8080"
+    volumes:
+      - ./api-gateway/certs:/certs:ro
     restart: unless-stopped
     depends_on:
       - order_service
+      - payment_service
+      - notification_service
 
+  # ------------------------------------------
+  # MICROSERVICES
+  # ------------------------------------------
+  auth_service:
+    build: ./service/auth
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - rabbitmq
+      - redis
   order_service:
     build: ./order-service
     ports:
-      - "8081:8081"
+      - "8082:8082"
     restart: unless-stopped
     depends_on:
       - postgres
@@ -56,17 +74,23 @@ services:
 
   payment_service:
     build: ./payment-service
+    ports:
+      - "8083:8083"
     restart: unless-stopped
     depends_on:
       - rabbitmq
 
   notification_service:
     build: ./notification-service
+    ports:
+      - "8084:8084"
     restart: unless-stopped
     depends_on:
       - rabbitmq
 
-  # --- Monitoring ---
+  # ------------------------------------------
+  # MONITORING
+  # ------------------------------------------
   prometheus:
     image: prom/prometheus:v2.37.1
     container_name: prometheus

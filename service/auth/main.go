@@ -22,13 +22,13 @@ func main() {
 	r.Handle("/metrics", promhttp.Handler())
 
 	server := &http.Server{
-		Addr:         ":8083",
+		Addr:         ":8081",
 		Handler:      r,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
-	log.Println("Auth Service is running on :8083")
+	log.Println("Auth Service is running on :8081")
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Could not start server: %s\n", err)
 	}

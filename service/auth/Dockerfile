@@ -1,24 +1,28 @@
 # Build stage
 FROM golang:1.21-alpine AS builder
+
 WORKDIR /app
 
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-RUN apk add --no-cache git
 
 COPY go.mod go.sum ./
 RUN go mod download
 
+# copy all folder service (auth, product, order, etc)
 COPY . .
 
-RUN go build -o auth-service ./auth-service
+# building
+WORKDIR /app/service/auth
+RUN go build -o auth-service .
 
-# Final stage - distroless static
+# Final stage
 FROM gcr.io/distroless/static:nonroot
 
 WORKDIR /
-COPY --from=builder /app/auth-service .
+COPY --from=builder /app/service/auth/auth-service .
 
 USER nonroot:nonroot
-EXPOSE 8083
+
+EXPOSE 8080
 
 ENTRYPOINT ["/auth-service"]
