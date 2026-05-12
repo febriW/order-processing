@@ -4,8 +4,8 @@ Generate API documentation from Go code (`swaggo/swag`) and verify KrakenD contr
 Implemented setup:
 - Annotation files:
   - `service/auth/handler.go` (inline handler annotations)
-  - `service/product/swag_docs.go`
-  - `service/order/swag_docs.go`
+  - `service/product/handler.go` (inline handler annotations)
+  - `service/order/handler.go` (inline handler annotations)
 - Tool commands:
   - `cmd/tools/swaggergen/main.go`
   - `cmd/tools/contractcheck/main.go`
