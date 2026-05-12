@@ -147,6 +147,17 @@ services:
     depends_on:
       - prometheus
 
+  swagger_ui:
+    image: swaggerapi/swagger-ui:v5.28.1
+    ports:
+      - "8088:8080"
+    environment:
+      URLS: '[{"url":"/spec/swagger.json","name":"All APIs"},{"url":"/spec/auth/swagger.json","name":"Auth API"},{"url":"/spec/product/swagger.json","name":"Product API"},{"url":"/spec/order/swagger.json","name":"Order API"}]'
+      URLS_PRIMARY_NAME: "All APIs"
+    volumes:
+      - ./docs/swagger:/usr/share/nginx/html/spec:ro
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:
