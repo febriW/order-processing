@@ -7,13 +7,14 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/febriW/order-processing/common/middleware"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
 	databaseURL := os.Getenv("DATABASE_URL")
-	authMiddleware := NewAuthMiddleware(envOrDefault("AUTH_VALIDATE_URL", "http://auth_service:8081/auth/validate"))
+	authMiddleware := middleware.NewAuthMiddleware(envOrDefault("AUTH_VALIDATE_URL", "http://auth_service:8081/auth/validate"), true)
 	repo := NewOrderRepository(databaseURL)
 
 	redisDB, err := strconv.Atoi(envOrDefault("REDIS_DB", "0"))
@@ -38,9 +39,9 @@ func main() {
 	handler := NewOrderHandler(service)
 
 	r := mux.NewRouter()
-	r.Handle("/orders", authMiddleware.RequireRoles(handler.CreateOrderHandler, basicUserRoles()...)).Methods("POST")
-	r.Handle("/orders", authMiddleware.RequireRoles(handler.ListOrdersHandler, basicUserRoles()...)).Methods("GET")
-	r.Handle("/orders/{id}", authMiddleware.RequireRoles(handler.GetOrderHandler, basicUserRoles()...)).Methods("GET")
+	r.Handle("/orders", authMiddleware.RequireRoles(middleware.BasicUserRoles()...)(http.HandlerFunc(handler.CreateOrderHandler))).Methods("POST")
+	r.Handle("/orders", authMiddleware.RequireRoles(middleware.BasicUserRoles()...)(http.HandlerFunc(handler.ListOrdersHandler))).Methods("GET")
+	r.Handle("/orders/{id}", authMiddleware.RequireRoles(middleware.BasicUserRoles()...)(http.HandlerFunc(handler.GetOrderHandler))).Methods("GET")
 	r.Handle("/metrics", promhttp.Handler())
 
 	server := &http.Server{

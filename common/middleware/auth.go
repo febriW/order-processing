@@ -1,4 +1,4 @@
-package main
+package middleware
 
 import (
 	"context"
@@ -17,8 +17,9 @@ type contextKey string
 const userIDContextKey contextKey = "user_id"
 
 type AuthMiddleware struct {
-	validateURL string
-	client      *http.Client
+	validateURL      string
+	client           *http.Client
+	includeUserInCtx bool
 }
 
 type validateResponse struct {
@@ -29,42 +30,50 @@ type validateResponse struct {
 	} `json:"data"`
 }
 
-func NewAuthMiddleware(validateURL string) *AuthMiddleware {
+func NewAuthMiddleware(validateURL string, includeUserInCtx bool) *AuthMiddleware {
 	return &AuthMiddleware{
-		validateURL: validateURL,
+		validateURL:      validateURL,
+		includeUserInCtx: includeUserInCtx,
 		client: &http.Client{
 			Timeout: 3 * time.Second,
 		},
 	}
 }
 
-func (m *AuthMiddleware) RequireRoles(next http.HandlerFunc, roles ...string) http.Handler {
+func (m *AuthMiddleware) RequireRoles(roles ...string) func(http.Handler) http.Handler {
 	allowedRoles := make(map[string]struct{}, len(roles))
 	for _, role := range roles {
 		allowedRoles[role] = struct{}{}
 	}
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
-		if token == "" {
-			utils.RespondWithError(w, http.StatusUnauthorized, "Authorization bearer token is required")
-			return
-		}
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			token := r.Header.Get("Authorization")
+			if token == "" {
+				utils.RespondWithError(w, http.StatusUnauthorized, "Authorization bearer token is required")
+				return
+			}
 
-		userID, userRole, err := m.validateToken(token)
-		if err != nil {
-			utils.RespondWithError(w, http.StatusUnauthorized, err.Error())
-			return
-		}
+			userID, userRole, err := m.validateToken(token)
+			if err != nil {
+				utils.RespondWithError(w, http.StatusUnauthorized, err.Error())
+				return
+			}
 
-		if _, allowed := allowedRoles[userRole]; !allowed {
-			utils.RespondWithError(w, http.StatusForbidden, "You do not have permission to access this resource")
-			return
-		}
+			if _, allowed := allowedRoles[userRole]; !allowed {
+				utils.RespondWithError(w, http.StatusForbidden, "You do not have permission to access this resource")
+				return
+			}
 
-		ctx := context.WithValue(r.Context(), userIDContextKey, userID)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+			if m.includeUserInCtx {
+				ctx := context.WithValue(r.Context(), userIDContextKey, userID)
+				next.ServeHTTP(w, r.WithContext(ctx))
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
 func (m *AuthMiddleware) validateToken(authorization string) (string, string, error) {
@@ -88,14 +97,17 @@ func (m *AuthMiddleware) validateToken(authorization string) (string, string, er
 	if err := json.NewDecoder(response.Body).Decode(&payload); err != nil {
 		return "", "", fmt.Errorf("invalid auth response")
 	}
-	if strings.TrimSpace(payload.Data.Role) == "" || strings.TrimSpace(payload.Data.UserID) == "" {
+	if strings.TrimSpace(payload.Data.Role) == "" {
+		return "", "", fmt.Errorf("invalid auth response")
+	}
+	if m.includeUserInCtx && strings.TrimSpace(payload.Data.UserID) == "" {
 		return "", "", fmt.Errorf("invalid auth response")
 	}
 
 	return payload.Data.UserID, payload.Data.Role, nil
 }
 
-func userIDFromContext(ctx context.Context) (string, bool) {
+func UserIDFromContext(ctx context.Context) (string, bool) {
 	value, ok := ctx.Value(userIDContextKey).(string)
 	if !ok || strings.TrimSpace(value) == "" {
 		return "", false
@@ -103,6 +115,10 @@ func userIDFromContext(ctx context.Context) (string, bool) {
 	return value, true
 }
 
-func basicUserRoles() []string {
+func BasicUserRoles() []string {
 	return []string{models.RoleBasicUser, models.RoleAdmin, models.RoleSuperAdmin}
+}
+
+func AdminRoles() []string {
+	return []string{models.RoleAdmin, models.RoleSuperAdmin}
 }

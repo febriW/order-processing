@@ -6,23 +6,24 @@ import (
 	"os"
 	"time"
 
+	"github.com/febriW/order-processing/common/middleware"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
 	databaseURL := os.Getenv("DATABASE_URL")
-	authMiddleware := NewAuthMiddleware(envOrDefault("AUTH_VALIDATE_URL", "http://auth_service:8081/auth/validate"))
+	authMiddleware := middleware.NewAuthMiddleware(envOrDefault("AUTH_VALIDATE_URL", "http://auth_service:8081/auth/validate"), false)
 	repo := NewProductRepository(databaseURL)
 	service := NewProductService(repo)
 	handler := NewProductHandler(service)
 
 	r := mux.NewRouter()
-	r.Handle("/products", authMiddleware.RequireRoles(adminRoles()...)(http.HandlerFunc(handler.CreateProductHandler))).Methods("POST")
-	r.Handle("/products", authMiddleware.RequireRoles(basicUserRoles()...)(http.HandlerFunc(handler.ListProductsHandler))).Methods("GET")
-	r.Handle("/products/{id}", authMiddleware.RequireRoles(basicUserRoles()...)(http.HandlerFunc(handler.GetProductHandler))).Methods("GET")
-	r.Handle("/products/{id}", authMiddleware.RequireRoles(adminRoles()...)(http.HandlerFunc(handler.UpdateProductHandler))).Methods("PUT")
-	r.Handle("/products/{id}", authMiddleware.RequireRoles(adminRoles()...)(http.HandlerFunc(handler.DeleteProductHandler))).Methods("DELETE")
+	r.Handle("/products", authMiddleware.RequireRoles(middleware.AdminRoles()...)(http.HandlerFunc(handler.CreateProductHandler))).Methods("POST")
+	r.Handle("/products", authMiddleware.RequireRoles(middleware.BasicUserRoles()...)(http.HandlerFunc(handler.ListProductsHandler))).Methods("GET")
+	r.Handle("/products/{id}", authMiddleware.RequireRoles(middleware.BasicUserRoles()...)(http.HandlerFunc(handler.GetProductHandler))).Methods("GET")
+	r.Handle("/products/{id}", authMiddleware.RequireRoles(middleware.AdminRoles()...)(http.HandlerFunc(handler.UpdateProductHandler))).Methods("PUT")
+	r.Handle("/products/{id}", authMiddleware.RequireRoles(middleware.AdminRoles()...)(http.HandlerFunc(handler.DeleteProductHandler))).Methods("DELETE")
 	r.Handle("/metrics", promhttp.Handler())
 
 	server := &http.Server{

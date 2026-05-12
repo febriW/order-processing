@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/febriW/order-processing/common/middleware"
 	"github.com/febriW/order-processing/common/utils"
 	"github.com/gorilla/mux"
 )
@@ -17,7 +18,7 @@ func NewOrderHandler(service *OrderService) *OrderHandler {
 }
 
 func (h *OrderHandler) CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
-	userID, ok := userIDFromContext(r.Context())
+	userID, ok := middleware.UserIDFromContext(r.Context())
 	if !ok {
 		utils.RespondWithError(w, http.StatusUnauthorized, "invalid user context")
 		return
@@ -44,7 +45,7 @@ func (h *OrderHandler) CreateOrderHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (h *OrderHandler) GetOrderHandler(w http.ResponseWriter, r *http.Request) {
-	userID, ok := userIDFromContext(r.Context())
+	userID, ok := middleware.UserIDFromContext(r.Context())
 	if !ok {
 		utils.RespondWithError(w, http.StatusUnauthorized, "invalid user context")
 		return
@@ -60,7 +61,7 @@ func (h *OrderHandler) GetOrderHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *OrderHandler) ListOrdersHandler(w http.ResponseWriter, r *http.Request) {
-	userID, ok := userIDFromContext(r.Context())
+	userID, ok := middleware.UserIDFromContext(r.Context())
 	if !ok {
 		utils.RespondWithError(w, http.StatusUnauthorized, "invalid user context")
 		return
