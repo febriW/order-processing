@@ -1,22 +1,25 @@
-version: '3.8'
+name: be-order-processing
 
 services:
   postgres:
     image: postgres:14-alpine
-    container_name: postgres_db
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: ecommerce_db
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-ecommerce_db}
+    expose:
+      - "5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
   rabbitmq:
     image: rabbitmq:3.9-management-alpine
-    container_name: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -27,11 +30,15 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: redis_cache
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
   # ------------------------------------------
@@ -39,61 +46,83 @@ services:
   # ------------------------------------------
   krakend:
     build: ./api-gateway
-    container_name: api_gateway
     ports:
-      - "443:8080"
-    volumes:
-      - ./api-gateway/certs:/certs:ro
+      - "${KRAKEND_PORT:-8080}:8080"
     restart: unless-stopped
     depends_on:
+      - auth_service
+      - product_service
       - order_service
-      - payment_service
-      - notification_service
 
   # ------------------------------------------
   # MICROSERVICES
   # ------------------------------------------
   auth_service:
-    build: ./service/auth
-    ports:
-      - "8081:8081"
+    build:
+      context: .
+      dockerfile: service/auth/Dockerfile
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-ecommerce_db}?sslmode=disable
+      REDIS_ADDR: redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_DB: ${REDIS_DB:-0}
+      JWT_SECRET: ${JWT_SECRET:-change-this-secret-in-production}
+    expose:
+      - "8081"
     restart: unless-stopped
     depends_on:
-      - postgres
-      - rabbitmq
-      - redis
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      redis:
+        condition: service_healthy
+
+  product_service:
+    build:
+      context: .
+      dockerfile: service/product/Dockerfile
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-ecommerce_db}?sslmode=disable
+      AUTH_VALIDATE_URL: http://auth_service:8081/auth/validate
+    expose:
+      - "8082"
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth_service:
+        condition: service_started
+
   order_service:
-    build: ./order-service
-    ports:
-      - "8082:8082"
+    build:
+      context: .
+      dockerfile: service/order/Dockerfile
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-ecommerce_db}?sslmode=disable
+      AUTH_VALIDATE_URL: http://auth_service:8081/auth/validate
+      REDIS_ADDR: redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_DB: ${REDIS_DB:-0}
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-guest}:${RABBITMQ_DEFAULT_PASS:-guest}@rabbitmq:5672/
+    expose:
+      - "8083"
     restart: unless-stopped
     depends_on:
-      - postgres
-      - rabbitmq
-      - redis
-
-  payment_service:
-    build: ./payment-service
-    ports:
-      - "8083:8083"
-    restart: unless-stopped
-    depends_on:
-      - rabbitmq
-
-  notification_service:
-    build: ./notification-service
-    ports:
-      - "8084:8084"
-    restart: unless-stopped
-    depends_on:
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      auth_service:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      redis:
+        condition: service_healthy
 
   # ------------------------------------------
   # MONITORING
   # ------------------------------------------
   prometheus:
     image: prom/prometheus:v2.37.1
-    container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
@@ -104,9 +133,16 @@ services:
 
   grafana:
     image: grafana/grafana:9.2.3
-    container_name: grafana
     ports:
       - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     restart: unless-stopped
     depends_on:
       - prometheus
