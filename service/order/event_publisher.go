@@ -16,11 +16,17 @@ const (
 )
 
 type OrderEventPublisher interface {
-	PublishOrderCreated(order models.Order) error
+	PublishOrderCreated(order models.Order, meta EventPublishMeta) error
 }
 
 type RabbitPublisher struct {
 	conn *amqp.Connection
+}
+
+type EventPublishMeta struct {
+	EventID       string
+	TraceID       string
+	CorrelationID string
 }
 
 func NewRabbitPublisher(url string) (*RabbitPublisher, error) {
@@ -31,7 +37,7 @@ func NewRabbitPublisher(url string) (*RabbitPublisher, error) {
 	return &RabbitPublisher{conn: conn}, nil
 }
 
-func (p *RabbitPublisher) PublishOrderCreated(order models.Order) error {
+func (p *RabbitPublisher) PublishOrderCreated(order models.Order, meta EventPublishMeta) error {
 	ch, err := p.conn.Channel()
 	if err != nil {
 		return err
@@ -51,15 +57,23 @@ func (p *RabbitPublisher) PublishOrderCreated(order models.Order) error {
 	defer cancel()
 
 	return ch.PublishWithContext(ctx, orderEventsExchange, orderCreatedKey, false, false, amqp.Publishing{
-		ContentType:  "application/json",
-		DeliveryMode: amqp.Persistent,
-		Timestamp:    time.Now().UTC(),
-		Body:         payload,
+		ContentType:   "application/json",
+		DeliveryMode:  amqp.Persistent,
+		Timestamp:     time.Now().UTC(),
+		MessageId:     meta.EventID,
+		CorrelationId: meta.CorrelationID,
+		Type:          orderCreatedKey,
+		Headers: amqp.Table{
+			"trace_id":       meta.TraceID,
+			"correlation_id": meta.CorrelationID,
+			"event_id":       meta.EventID,
+		},
+		Body: payload,
 	})
 }
 
 type noopOrderEventPublisher struct{}
 
-func (noopOrderEventPublisher) PublishOrderCreated(order models.Order) error {
+func (noopOrderEventPublisher) PublishOrderCreated(order models.Order, meta EventPublishMeta) error {
 	return nil
 }

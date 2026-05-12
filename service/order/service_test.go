@@ -32,7 +32,7 @@ func newFakeOrderCache() *fakeOrderCache {
 	}
 }
 
-func (r *fakeOrderRepository) CreateOrder(order models.Order) error {
+func (r *fakeOrderRepository) CreateOrderWithOutbox(order models.Order, eventType string, payload []byte, traceID, correlationID string) error {
 	r.orders[order.ID] = order
 	return nil
 }
@@ -83,7 +83,7 @@ func (c *fakeOrderCache) GetCachedOrder(id string) (*models.Order, error) {
 	return &order, nil
 }
 
-func (p *fakeOrderPublisher) PublishOrderCreated(order models.Order) error {
+func (p *fakeOrderPublisher) PublishOrderCreated(order models.Order, meta EventPublishMeta) error {
 	p.published = append(p.published, order)
 	return nil
 }
@@ -94,7 +94,7 @@ func TestCreateOrder(t *testing.T) {
 	publisher := &fakeOrderPublisher{}
 	service := NewOrderService(repo, cache, publisher)
 
-	order, err := service.CreateOrder("user-1", "idem-1", CreateOrderRequest{
+	order, err := service.CreateOrder("user-1", "idem-1", "trace-1", "corr-1", CreateOrderRequest{
 		ProductID: "product-1",
 		Quantity:  2,
 		Amount:    120000,
@@ -109,8 +109,8 @@ func TestCreateOrder(t *testing.T) {
 	if order.UserID != "user-1" {
 		t.Fatalf("expected user-1, got %s", order.UserID)
 	}
-	if len(publisher.published) != 1 {
-		t.Fatalf("expected one order event, got %d", len(publisher.published))
+	if len(publisher.published) != 0 {
+		t.Fatalf("expected no direct publish from CreateOrder, got %d", len(publisher.published))
 	}
 }
 
@@ -131,7 +131,7 @@ func TestCreateOrderIdempotency(t *testing.T) {
 	}
 	cache.idempotency["idem-1"] = cached
 
-	order, err := service.CreateOrder("user-1", "idem-1", CreateOrderRequest{
+	order, err := service.CreateOrder("user-1", "idem-1", "trace-2", "corr-2", CreateOrderRequest{
 		ProductID: "product-1",
 		Quantity:  1,
 		Amount:    1000,

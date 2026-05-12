@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -16,7 +17,7 @@ type OrderService struct {
 }
 
 type OrderRepository interface {
-	CreateOrder(order models.Order) error
+	CreateOrderWithOutbox(order models.Order, eventType string, payload []byte, traceID, correlationID string) error
 	GetOrderByID(id string) (*models.Order, error)
 	ListOrdersByUser(userID string) ([]models.Order, error)
 }
@@ -37,7 +38,7 @@ func NewOrderService(repo OrderRepository, cache OrderCacheStore, publisher Orde
 	return &OrderService{repo: repo, cache: cache, publisher: publisher}
 }
 
-func (s *OrderService) CreateOrder(userID, idempotencyKey string, req CreateOrderRequest) (*models.Order, error) {
+func (s *OrderService) CreateOrder(userID, idempotencyKey, traceID, correlationID string, req CreateOrderRequest) (*models.Order, error) {
 	if strings.TrimSpace(userID) == "" {
 		return nil, fmt.Errorf("user id is required")
 	}
@@ -59,7 +60,12 @@ func (s *OrderService) CreateOrder(userID, idempotencyKey string, req CreateOrde
 		CreatedAt: time.Now().UTC(),
 	}
 
-	if err := s.repo.CreateOrder(order); err != nil {
+	payload, err := json.Marshal(order)
+	if err != nil {
+		return nil, fmt.Errorf("could not marshal order event payload: %w", err)
+	}
+
+	if err := s.repo.CreateOrderWithOutbox(order, orderCreatedKey, payload, traceID, correlationID); err != nil {
 		return nil, fmt.Errorf("could not create order: %w", err)
 	}
 
@@ -70,7 +76,6 @@ func (s *OrderService) CreateOrder(userID, idempotencyKey string, req CreateOrde
 
 	_ = s.cache.StoreCreatedOrder(strings.TrimSpace(idempotencyKey), *created)
 	_ = s.cache.CacheOrder(*created)
-	_ = s.publisher.PublishOrderCreated(*created)
 
 	return created, nil
 }

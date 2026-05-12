@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/febriW/order-processing/common/models"
 	"github.com/febriW/order-processing/common/middleware"
+	"github.com/febriW/order-processing/common/models"
 	"github.com/febriW/order-processing/common/utils"
 	"github.com/gorilla/mux"
 )
@@ -59,8 +59,14 @@ func NewOrderHandler(service *OrderService) *OrderHandler {
 // @Failure 401 {object} orderEmptyResponse
 // @Router /orders [post]
 func (h *OrderHandler) CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
+	traceID := TraceIDFromContext(r.Context())
+	correlationID := CorrelationIDFromContext(r.Context())
 	userID, ok := middleware.UserIDFromContext(r.Context())
 	if !ok {
+		logJSON("warn", "order_create_unauthorized", map[string]any{
+			"trace_id":       traceID,
+			"correlation_id": correlationID,
+		})
 		utils.RespondWithError(w, http.StatusUnauthorized, "invalid user context")
 		return
 	}
@@ -72,15 +78,33 @@ func (h *OrderHandler) CreateOrderHandler(w http.ResponseWriter, r *http.Request
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&req); err != nil {
+		logJSON("warn", "order_create_invalid_payload", map[string]any{
+			"trace_id":       traceID,
+			"correlation_id": correlationID,
+			"user_id":        userID,
+			"error":          err.Error(),
+		})
 		utils.RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
-	order, err := h.service.CreateOrder(userID, r.Header.Get("Idempotency-Key"), req)
+	order, err := h.service.CreateOrder(userID, r.Header.Get("Idempotency-Key"), traceID, correlationID, req)
 	if err != nil {
+		logJSON("warn", "order_create_failed", map[string]any{
+			"trace_id":       traceID,
+			"correlation_id": correlationID,
+			"user_id":        userID,
+			"error":          err.Error(),
+		})
 		utils.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	logJSON("info", "order_created", map[string]any{
+		"trace_id":       traceID,
+		"correlation_id": correlationID,
+		"user_id":        userID,
+		"order_id":       order.ID,
+	})
 
 	utils.RespondWithJSON(w, http.StatusCreated, "Order created successfully", order)
 }

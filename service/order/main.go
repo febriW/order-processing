@@ -35,10 +35,42 @@ func main() {
 		log.Fatalf("Unable to initialize rabbit publisher: %v\n", err)
 	}
 
+	outboxInterval, err := time.ParseDuration(envOrDefault("OUTBOX_RELAY_INTERVAL", "2s"))
+	if err != nil {
+		log.Fatalf("Invalid OUTBOX_RELAY_INTERVAL: %v\n", err)
+	}
+	outboxClaimTTL, err := time.ParseDuration(envOrDefault("OUTBOX_CLAIM_TTL", "30s"))
+	if err != nil {
+		log.Fatalf("Invalid OUTBOX_CLAIM_TTL: %v\n", err)
+	}
+	outboxBaseBackoff, err := time.ParseDuration(envOrDefault("OUTBOX_BASE_BACKOFF", "2s"))
+	if err != nil {
+		log.Fatalf("Invalid OUTBOX_BASE_BACKOFF: %v\n", err)
+	}
+	outboxMaxBackoff, err := time.ParseDuration(envOrDefault("OUTBOX_MAX_BACKOFF", "2m"))
+	if err != nil {
+		log.Fatalf("Invalid OUTBOX_MAX_BACKOFF: %v\n", err)
+	}
+	outboxBatchSize, err := strconv.Atoi(envOrDefault("OUTBOX_BATCH_SIZE", "20"))
+	if err != nil {
+		log.Fatalf("Invalid OUTBOX_BATCH_SIZE: %v\n", err)
+	}
+	outboxMaxAttempts, err := strconv.Atoi(envOrDefault("OUTBOX_MAX_ATTEMPTS", "8"))
+	if err != nil {
+		log.Fatalf("Invalid OUTBOX_MAX_ATTEMPTS: %v\n", err)
+	}
+
 	service := NewOrderService(repo, cacheStore, publisher)
 	handler := NewOrderHandler(service)
+	relay := NewOutboxRelay(repo, publisher, outboxInterval, outboxBatchSize)
+	relay.claimTTL = outboxClaimTTL
+	relay.baseBackoff = outboxBaseBackoff
+	relay.maxBackoff = outboxMaxBackoff
+	relay.maxAttempts = outboxMaxAttempts
+	go relay.Start()
 
 	r := mux.NewRouter()
+	r.Use(requestContextMiddleware("order_service"))
 	r.Handle("/orders", authMiddleware.RequireRoles(middleware.BasicUserRoles()...)(http.HandlerFunc(handler.CreateOrderHandler))).Methods("POST")
 	r.Handle("/orders", authMiddleware.RequireRoles(middleware.BasicUserRoles()...)(http.HandlerFunc(handler.ListOrdersHandler))).Methods("GET")
 	r.Handle("/orders/{id}", authMiddleware.RequireRoles(middleware.BasicUserRoles()...)(http.HandlerFunc(handler.GetOrderHandler))).Methods("GET")
