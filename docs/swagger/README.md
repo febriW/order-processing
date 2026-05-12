@@ -4,7 +4,7 @@ Swagger specs are generated from `swaggo/swag` annotations in Go source.
 
 ## Generate
 ```bash
-powershell -ExecutionPolicy Bypass -File scripts/generate-swagger.ps1
+make swagger
 ```
 
 ## Output Files

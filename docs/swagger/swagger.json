@@ -1,865 +1,841 @@
-﻿{
-    "swagger":  "2.0",
-    "info":  {
-                 "contact":  {
-
-                             },
-                 "title":  "Order Processing API",
-                 "description":  "Combined API documentation for auth, product, and order services."
-             },
-    "paths":  {
-                  "/auth/login":  {
-                                      "post":  {
-                                                   "consumes":  [
-                                                                    "application/json"
-                                                                ],
-                                                   "produces":  [
-                                                                    "application/json"
-                                                                ],
-                                                   "tags":  [
-                                                                "auth"
-                                                            ],
-                                                   "summary":  "Login user",
-                                                   "parameters":  [
-                                                                      {
-                                                                          "description":  "Login payload",
-                                                                          "name":  "payload",
-                                                                          "in":  "body",
-                                                                          "required":  true,
-                                                                          "schema":  {
-                                                                                         "$ref":  "#/definitions/main.AuthRequest"
-                                                                                     }
-                                                                      }
-                                                                  ],
-                                                   "responses":  {
-                                                                     "200":  {
-                                                                                 "description":  "OK",
-                                                                                 "schema":  {
-                                                                                                "$ref":  "#/definitions/main.authTokenDataResponse"
-                                                                                            }
-                                                                             },
-                                                                     "400":  {
-                                                                                 "description":  "Bad Request",
-                                                                                 "schema":  {
-                                                                                                "$ref":  "#/definitions/main.authEmptyResponse"
-                                                                                            }
-                                                                             },
-                                                                     "401":  {
-                                                                                 "description":  "Unauthorized",
-                                                                                 "schema":  {
-                                                                                                "$ref":  "#/definitions/main.authEmptyResponse"
-                                                                                            }
-                                                                             }
-                                                                 }
-                                               }
-                                  },
-                  "/auth/logout":  {
-                                       "post":  {
-                                                    "security":  [
-                                                                     {
-                                                                         "BearerAuth":  [
-
-                                                                                        ]
-                                                                     }
-                                                                 ],
-                                                    "produces":  [
-                                                                     "application/json"
-                                                                 ],
-                                                    "tags":  [
-                                                                 "auth"
-                                                             ],
-                                                    "summary":  "Logout user",
-                                                    "responses":  {
-                                                                      "200":  {
-                                                                                  "description":  "OK",
-                                                                                  "schema":  {
-                                                                                                 "$ref":  "#/definitions/main.authEmptyResponse"
-                                                                                             }
-                                                                              },
-                                                                      "401":  {
-                                                                                  "description":  "Unauthorized",
-                                                                                  "schema":  {
-                                                                                                 "$ref":  "#/definitions/main.authEmptyResponse"
-                                                                                             }
-                                                                              }
-                                                                  }
-                                                }
-                                   },
-                  "/auth/refresh":  {
-                                        "post":  {
-                                                     "consumes":  [
-                                                                      "application/json"
-                                                                  ],
-                                                     "produces":  [
-                                                                      "application/json"
-                                                                  ],
-                                                     "tags":  [
-                                                                  "auth"
-                                                              ],
-                                                     "summary":  "Refresh token pair",
-                                                     "parameters":  [
-                                                                        {
-                                                                            "description":  "Refresh payload",
-                                                                            "name":  "payload",
-                                                                            "in":  "body",
-                                                                            "required":  true,
-                                                                            "schema":  {
-                                                                                           "$ref":  "#/definitions/main.RefreshTokenRequest"
-                                                                                       }
-                                                                        }
-                                                                    ],
-                                                     "responses":  {
-                                                                       "200":  {
-                                                                                   "description":  "OK",
-                                                                                   "schema":  {
-                                                                                                  "$ref":  "#/definitions/main.authTokenDataResponse"
-                                                                                              }
-                                                                               },
-                                                                       "400":  {
-                                                                                   "description":  "Bad Request",
-                                                                                   "schema":  {
-                                                                                                  "$ref":  "#/definitions/main.authEmptyResponse"
-                                                                                              }
-                                                                               },
-                                                                       "401":  {
-                                                                                   "description":  "Unauthorized",
-                                                                                   "schema":  {
-                                                                                                  "$ref":  "#/definitions/main.authEmptyResponse"
-                                                                                              }
-                                                                               }
-                                                                   }
-                                                 }
-                                    },
-                  "/auth/register":  {
-                                         "post":  {
-                                                      "consumes":  [
-                                                                       "application/json"
-                                                                   ],
-                                                      "produces":  [
-                                                                       "application/json"
-                                                                   ],
-                                                      "tags":  [
-                                                                   "auth"
-                                                               ],
-                                                      "summary":  "Register user",
-                                                      "parameters":  [
-                                                                         {
-                                                                             "description":  "Register payload",
-                                                                             "name":  "payload",
-                                                                             "in":  "body",
-                                                                             "required":  true,
-                                                                             "schema":  {
-                                                                                            "$ref":  "#/definitions/main.AuthRequest"
-                                                                                        }
-                                                                         }
-                                                                     ],
-                                                      "responses":  {
-                                                                        "201":  {
-                                                                                    "description":  "Created",
-                                                                                    "schema":  {
-                                                                                                   "$ref":  "#/definitions/main.authUserDataResponse"
-                                                                                               }
-                                                                                },
-                                                                        "400":  {
-                                                                                    "description":  "Bad Request",
-                                                                                    "schema":  {
-                                                                                                   "$ref":  "#/definitions/main.authEmptyResponse"
-                                                                                               }
-                                                                                },
-                                                                        "500":  {
-                                                                                    "description":  "Internal Server Error",
-                                                                                    "schema":  {
-                                                                                                   "$ref":  "#/definitions/main.authEmptyResponse"
-                                                                                               }
-                                                                                }
-                                                                    }
-                                                  }
-                                     },
-                  "/auth/validate":  {
-                                         "get":  {
-                                                     "security":  [
-                                                                      {
-                                                                          "BearerAuth":  [
-
-                                                                                         ]
-                                                                      }
-                                                                  ],
-                                                     "produces":  [
-                                                                      "application/json"
-                                                                  ],
-                                                     "tags":  [
-                                                                  "auth"
-                                                              ],
-                                                     "summary":  "Validate bearer token",
-                                                     "responses":  {
-                                                                       "200":  {
-                                                                                   "description":  "OK",
-                                                                                   "schema":  {
-                                                                                                  "$ref":  "#/definitions/main.authValidationDataResponse"
-                                                                                              }
-                                                                               },
-                                                                       "401":  {
-                                                                                   "description":  "Unauthorized",
-                                                                                   "schema":  {
-                                                                                                  "$ref":  "#/definitions/main.authEmptyResponse"
-                                                                                              }
-                                                                               }
-                                                                   }
-                                                 }
-                                     },
-                  "/products":  {
-                                    "get":  {
-                                                "security":  [
-                                                                 {
-                                                                     "BearerAuth":  [
-
-                                                                                    ]
-                                                                 }
-                                                             ],
-                                                "produces":  [
-                                                                 "application/json"
-                                                             ],
-                                                "tags":  [
-                                                             "product"
-                                                         ],
-                                                "summary":  "List products",
-                                                "responses":  {
-                                                                  "200":  {
-                                                                              "description":  "OK",
-                                                                              "schema":  {
-                                                                                             "$ref":  "#/definitions/main.productListDataResponse"
-                                                                                         }
-                                                                          },
-                                                                  "401":  {
-                                                                              "description":  "Unauthorized",
-                                                                              "schema":  {
-                                                                                             "$ref":  "#/definitions/main.productEmptyResponse"
-                                                                                         }
-                                                                          },
-                                                                  "500":  {
-                                                                              "description":  "Internal Server Error",
-                                                                              "schema":  {
-                                                                                             "$ref":  "#/definitions/main.productEmptyResponse"
-                                                                                         }
-                                                                          }
-                                                              }
-                                            },
-                                    "post":  {
-                                                 "security":  [
-                                                                  {
-                                                                      "BearerAuth":  [
-
-                                                                                     ]
-                                                                  }
-                                                              ],
-                                                 "consumes":  [
-                                                                  "application/json"
-                                                              ],
-                                                 "produces":  [
-                                                                  "application/json"
-                                                              ],
-                                                 "tags":  [
-                                                              "product"
-                                                          ],
-                                                 "summary":  "Create product",
-                                                 "parameters":  [
-                                                                    {
-                                                                        "description":  "Product payload",
-                                                                        "name":  "payload",
-                                                                        "in":  "body",
-                                                                        "required":  true,
-                                                                        "schema":  {
-                                                                                       "$ref":  "#/definitions/main.ProductRequest"
-                                                                                   }
-                                                                    }
-                                                                ],
-                                                 "responses":  {
-                                                                   "201":  {
-                                                                               "description":  "Created",
-                                                                               "schema":  {
-                                                                                              "$ref":  "#/definitions/main.productDataResponse"
-                                                                                          }
-                                                                           },
-                                                                   "400":  {
-                                                                               "description":  "Bad Request",
-                                                                               "schema":  {
-                                                                                              "$ref":  "#/definitions/main.productEmptyResponse"
-                                                                                          }
-                                                                           },
-                                                                   "401":  {
-                                                                               "description":  "Unauthorized",
-                                                                               "schema":  {
-                                                                                              "$ref":  "#/definitions/main.productEmptyResponse"
-                                                                                          }
-                                                                           }
-                                                               }
-                                             }
-                                },
-                  "/products/{id}":  {
-                                         "get":  {
-                                                     "security":  [
-                                                                      {
-                                                                          "BearerAuth":  [
-
-                                                                                         ]
-                                                                      }
-                                                                  ],
-                                                     "produces":  [
-                                                                      "application/json"
-                                                                  ],
-                                                     "tags":  [
-                                                                  "product"
-                                                              ],
-                                                     "summary":  "Get product by id",
-                                                     "parameters":  [
-                                                                        {
-                                                                            "type":  "string",
-                                                                            "description":  "Product ID",
-                                                                            "name":  "id",
-                                                                            "in":  "path",
-                                                                            "required":  true
-                                                                        }
-                                                                    ],
-                                                     "responses":  {
-                                                                       "200":  {
-                                                                                   "description":  "OK",
-                                                                                   "schema":  {
-                                                                                                  "$ref":  "#/definitions/main.productDataResponse"
-                                                                                              }
-                                                                               },
-                                                                       "401":  {
-                                                                                   "description":  "Unauthorized",
-                                                                                   "schema":  {
-                                                                                                  "$ref":  "#/definitions/main.productEmptyResponse"
-                                                                                              }
-                                                                               },
-                                                                       "404":  {
-                                                                                   "description":  "Not Found",
-                                                                                   "schema":  {
-                                                                                                  "$ref":  "#/definitions/main.productEmptyResponse"
-                                                                                              }
-                                                                               }
-                                                                   }
-                                                 },
-                                         "put":  {
-                                                     "security":  [
-                                                                      {
-                                                                          "BearerAuth":  [
-
-                                                                                         ]
-                                                                      }
-                                                                  ],
-                                                     "consumes":  [
-                                                                      "application/json"
-                                                                  ],
-                                                     "produces":  [
-                                                                      "application/json"
-                                                                  ],
-                                                     "tags":  [
-                                                                  "product"
-                                                              ],
-                                                     "summary":  "Update product by id",
-                                                     "parameters":  [
-                                                                        {
-                                                                            "type":  "string",
-                                                                            "description":  "Product ID",
-                                                                            "name":  "id",
-                                                                            "in":  "path",
-                                                                            "required":  true
-                                                                        },
-                                                                        {
-                                                                            "description":  "Product payload",
-                                                                            "name":  "payload",
-                                                                            "in":  "body",
-                                                                            "required":  true,
-                                                                            "schema":  {
-                                                                                           "$ref":  "#/definitions/main.ProductRequest"
-                                                                                       }
-                                                                        }
-                                                                    ],
-                                                     "responses":  {
-                                                                       "200":  {
-                                                                                   "description":  "OK",
-                                                                                   "schema":  {
-                                                                                                  "$ref":  "#/definitions/main.productDataResponse"
-                                                                                              }
-                                                                               },
-                                                                       "400":  {
-                                                                                   "description":  "Bad Request",
-                                                                                   "schema":  {
-                                                                                                  "$ref":  "#/definitions/main.productEmptyResponse"
-                                                                                              }
-                                                                               },
-                                                                       "401":  {
-                                                                                   "description":  "Unauthorized",
-                                                                                   "schema":  {
-                                                                                                  "$ref":  "#/definitions/main.productEmptyResponse"
-                                                                                              }
-                                                                               }
-                                                                   }
-                                                 },
-                                         "delete":  {
-                                                        "security":  [
-                                                                         {
-                                                                             "BearerAuth":  [
-
-                                                                                            ]
-                                                                         }
-                                                                     ],
-                                                        "produces":  [
-                                                                         "application/json"
-                                                                     ],
-                                                        "tags":  [
-                                                                     "product"
-                                                                 ],
-                                                        "summary":  "Delete product by id",
-                                                        "parameters":  [
-                                                                           {
-                                                                               "type":  "string",
-                                                                               "description":  "Product ID",
-                                                                               "name":  "id",
-                                                                               "in":  "path",
-                                                                               "required":  true
-                                                                           }
-                                                                       ],
-                                                        "responses":  {
-                                                                          "200":  {
-                                                                                      "description":  "OK",
-                                                                                      "schema":  {
-                                                                                                     "$ref":  "#/definitions/main.productEmptyResponse"
-                                                                                                 }
-                                                                                  },
-                                                                          "401":  {
-                                                                                      "description":  "Unauthorized",
-                                                                                      "schema":  {
-                                                                                                     "$ref":  "#/definitions/main.productEmptyResponse"
-                                                                                                 }
-                                                                                  },
-                                                                          "404":  {
-                                                                                      "description":  "Not Found",
-                                                                                      "schema":  {
-                                                                                                     "$ref":  "#/definitions/main.productEmptyResponse"
-                                                                                                 }
-                                                                                  }
-                                                                      }
-                                                    }
-                                     },
-                  "/orders":  {
-                                  "get":  {
-                                              "security":  [
-                                                               {
-                                                                   "BearerAuth":  [
-
-                                                                                  ]
-                                                               }
-                                                           ],
-                                              "produces":  [
-                                                               "application/json"
-                                                           ],
-                                              "tags":  [
-                                                           "order"
-                                                       ],
-                                              "summary":  "List orders",
-                                              "responses":  {
-                                                                "200":  {
-                                                                            "description":  "OK",
-                                                                            "schema":  {
-                                                                                           "$ref":  "#/definitions/main.orderListDataResponse"
-                                                                                       }
-                                                                        },
-                                                                "401":  {
-                                                                            "description":  "Unauthorized",
-                                                                            "schema":  {
-                                                                                           "$ref":  "#/definitions/main.orderEmptyResponse"
-                                                                                       }
-                                                                        },
-                                                                "500":  {
-                                                                            "description":  "Internal Server Error",
-                                                                            "schema":  {
-                                                                                           "$ref":  "#/definitions/main.orderEmptyResponse"
-                                                                                       }
-                                                                        }
-                                                            }
-                                          },
-                                  "post":  {
-                                               "security":  [
-                                                                {
-                                                                    "BearerAuth":  [
-
-                                                                                   ]
-                                                                }
-                                                            ],
-                                               "consumes":  [
-                                                                "application/json"
-                                                            ],
-                                               "produces":  [
-                                                                "application/json"
-                                                            ],
-                                               "tags":  [
-                                                            "order"
-                                                        ],
-                                               "summary":  "Create order",
-                                               "parameters":  [
-                                                                  {
-                                                                      "type":  "string",
-                                                                      "description":  "Idempotency key",
-                                                                      "name":  "Idempotency-Key",
-                                                                      "in":  "header",
-                                                                      "required":  true
-                                                                  },
-                                                                  {
-                                                                      "description":  "Order payload",
-                                                                      "name":  "payload",
-                                                                      "in":  "body",
-                                                                      "required":  true,
-                                                                      "schema":  {
-                                                                                     "$ref":  "#/definitions/main.CreateOrderRequest"
-                                                                                 }
-                                                                  }
-                                                              ],
-                                               "responses":  {
-                                                                 "201":  {
-                                                                             "description":  "Created",
-                                                                             "schema":  {
-                                                                                            "$ref":  "#/definitions/main.orderDataResponse"
-                                                                                        }
-                                                                         },
-                                                                 "400":  {
-                                                                             "description":  "Bad Request",
-                                                                             "schema":  {
-                                                                                            "$ref":  "#/definitions/main.orderEmptyResponse"
-                                                                                        }
-                                                                         },
-                                                                 "401":  {
-                                                                             "description":  "Unauthorized",
-                                                                             "schema":  {
-                                                                                            "$ref":  "#/definitions/main.orderEmptyResponse"
-                                                                                        }
-                                                                         }
-                                                             }
-                                           }
-                              },
-                  "/orders/{id}":  {
-                                       "get":  {
-                                                   "security":  [
-                                                                    {
-                                                                        "BearerAuth":  [
-
-                                                                                       ]
-                                                                    }
-                                                                ],
-                                                   "produces":  [
-                                                                    "application/json"
-                                                                ],
-                                                   "tags":  [
-                                                                "order"
-                                                            ],
-                                                   "summary":  "Get order by id",
-                                                   "parameters":  [
-                                                                      {
-                                                                          "type":  "string",
-                                                                          "description":  "Order ID",
-                                                                          "name":  "id",
-                                                                          "in":  "path",
-                                                                          "required":  true
-                                                                      }
-                                                                  ],
-                                                   "responses":  {
-                                                                     "200":  {
-                                                                                 "description":  "OK",
-                                                                                 "schema":  {
-                                                                                                "$ref":  "#/definitions/main.orderDataResponse"
-                                                                                            }
-                                                                             },
-                                                                     "401":  {
-                                                                                 "description":  "Unauthorized",
-                                                                                 "schema":  {
-                                                                                                "$ref":  "#/definitions/main.orderEmptyResponse"
-                                                                                            }
-                                                                             },
-                                                                     "404":  {
-                                                                                 "description":  "Not Found",
-                                                                                 "schema":  {
-                                                                                                "$ref":  "#/definitions/main.orderEmptyResponse"
-                                                                                            }
-                                                                             }
-                                                                 }
-                                               }
-                                   }
-              },
-    "definitions":  {
-                        "main.AuthRequest":  {
-                                                 "type":  "object",
-                                                 "properties":  {
-                                                                    "email":  {
-                                                                                  "type":  "string"
-                                                                              },
-                                                                    "password":  {
-                                                                                     "type":  "string"
-                                                                                 }
-                                                                }
-                                             },
-                        "main.AuthResponse":  {
-                                                  "type":  "object",
-                                                  "properties":  {
-                                                                     "access_token":  {
-                                                                                          "type":  "string"
-                                                                                      },
-                                                                     "refresh_token":  {
-                                                                                           "type":  "string"
-                                                                                       }
-                                                                 }
-                                              },
-                        "main.AuthValidationResponse":  {
-                                                            "type":  "object",
-                                                            "properties":  {
-                                                                               "role":  {
-                                                                                            "type":  "string"
-                                                                                        },
-                                                                               "user_id":  {
-                                                                                               "type":  "string"
-                                                                                           }
-                                                                           }
-                                                        },
-                        "main.RefreshTokenRequest":  {
-                                                         "type":  "object",
-                                                         "properties":  {
-                                                                            "refresh_token":  {
-                                                                                                  "type":  "string"
-                                                                                              }
-                                                                        }
-                                                     },
-                        "main.authEmptyResponse":  {
-                                                       "type":  "object",
-                                                       "properties":  {
-                                                                          "message":  {
-                                                                                          "type":  "string"
-                                                                                      },
-                                                                          "status":  {
-                                                                                         "type":  "integer"
-                                                                                     }
-                                                                      }
-                                                   },
-                        "main.authTokenDataResponse":  {
-                                                           "type":  "object",
-                                                           "properties":  {
-                                                                              "data":  {
-                                                                                           "$ref":  "#/definitions/main.AuthResponse"
-                                                                                       },
-                                                                              "message":  {
-                                                                                              "type":  "string"
-                                                                                          },
-                                                                              "status":  {
-                                                                                             "type":  "integer"
-                                                                                         }
-                                                                          }
-                                                       },
-                        "main.authUserDataResponse":  {
-                                                          "type":  "object",
-                                                          "properties":  {
-                                                                             "data":  {
-                                                                                          "$ref":  "#/definitions/models.User"
-                                                                                      },
-                                                                             "message":  {
-                                                                                             "type":  "string"
-                                                                                         },
-                                                                             "status":  {
-                                                                                            "type":  "integer"
-                                                                                        }
-                                                                         }
-                                                      },
-                        "main.authValidationDataResponse":  {
-                                                                "type":  "object",
-                                                                "properties":  {
-                                                                                   "data":  {
-                                                                                                "$ref":  "#/definitions/main.AuthValidationResponse"
-                                                                                            },
-                                                                                   "message":  {
-                                                                                                   "type":  "string"
-                                                                                               },
-                                                                                   "status":  {
-                                                                                                  "type":  "integer"
-                                                                                              }
-                                                                               }
-                                                            },
-                        "models.User":  {
-                                            "type":  "object",
-                                            "properties":  {
-                                                               "email":  {
-                                                                             "type":  "string"
-                                                                         },
-                                                               "id":  {
-                                                                          "type":  "string"
-                                                                      },
-                                                               "role":  {
-                                                                            "type":  "string"
-                                                                        }
-                                                           }
-                                        },
-                        "main.ProductRequest":  {
-                                                    "type":  "object",
-                                                    "properties":  {
-                                                                       "description":  {
-                                                                                           "type":  "string"
-                                                                                       },
-                                                                       "name":  {
-                                                                                    "type":  "string"
-                                                                                },
-                                                                       "price":  {
-                                                                                     "type":  "number"
-                                                                                 },
-                                                                       "stock":  {
-                                                                                     "type":  "integer"
-                                                                                 }
-                                                                   }
-                                                },
-                        "main.productDataResponse":  {
-                                                         "type":  "object",
-                                                         "properties":  {
-                                                                            "data":  {
-                                                                                         "$ref":  "#/definitions/models.Product"
-                                                                                     },
-                                                                            "message":  {
-                                                                                            "type":  "string"
-                                                                                        },
-                                                                            "status":  {
-                                                                                           "type":  "integer"
-                                                                                       }
-                                                                        }
-                                                     },
-                        "main.productEmptyResponse":  {
-                                                          "type":  "object",
-                                                          "properties":  {
-                                                                             "message":  {
-                                                                                             "type":  "string"
-                                                                                         },
-                                                                             "status":  {
-                                                                                            "type":  "integer"
-                                                                                        }
-                                                                         }
-                                                      },
-                        "main.productListDataResponse":  {
-                                                             "type":  "object",
-                                                             "properties":  {
-                                                                                "data":  {
-                                                                                             "type":  "array",
-                                                                                             "items":  {
-                                                                                                           "$ref":  "#/definitions/models.Product"
-                                                                                                       }
-                                                                                         },
-                                                                                "message":  {
-                                                                                                "type":  "string"
-                                                                                            },
-                                                                                "status":  {
-                                                                                               "type":  "integer"
-                                                                                           }
-                                                                            }
-                                                         },
-                        "models.Product":  {
-                                               "type":  "object",
-                                               "properties":  {
-                                                                  "description":  {
-                                                                                      "type":  "string"
-                                                                                  },
-                                                                  "id":  {
-                                                                             "type":  "string"
-                                                                         },
-                                                                  "name":  {
-                                                                               "type":  "string"
-                                                                           },
-                                                                  "price":  {
-                                                                                "type":  "number"
-                                                                            },
-                                                                  "stock":  {
-                                                                                "type":  "integer"
-                                                                            }
-                                                              }
-                                           },
-                        "main.CreateOrderRequest":  {
-                                                        "type":  "object",
-                                                        "properties":  {
-                                                                           "amount":  {
-                                                                                          "type":  "number"
-                                                                                      },
-                                                                           "product_id":  {
-                                                                                              "type":  "string"
-                                                                                          },
-                                                                           "quantity":  {
-                                                                                            "type":  "integer"
-                                                                                        }
-                                                                       }
-                                                    },
-                        "main.orderDataResponse":  {
-                                                       "type":  "object",
-                                                       "properties":  {
-                                                                          "data":  {
-                                                                                       "$ref":  "#/definitions/models.Order"
-                                                                                   },
-                                                                          "message":  {
-                                                                                          "type":  "string"
-                                                                                      },
-                                                                          "status":  {
-                                                                                         "type":  "integer"
-                                                                                     }
-                                                                      }
-                                                   },
-                        "main.orderEmptyResponse":  {
-                                                        "type":  "object",
-                                                        "properties":  {
-                                                                           "message":  {
-                                                                                           "type":  "string"
-                                                                                       },
-                                                                           "status":  {
-                                                                                          "type":  "integer"
-                                                                                      }
-                                                                       }
-                                                    },
-                        "main.orderListDataResponse":  {
-                                                           "type":  "object",
-                                                           "properties":  {
-                                                                              "data":  {
-                                                                                           "type":  "array",
-                                                                                           "items":  {
-                                                                                                         "$ref":  "#/definitions/models.Order"
-                                                                                                     }
-                                                                                       },
-                                                                              "message":  {
-                                                                                              "type":  "string"
-                                                                                          },
-                                                                              "status":  {
-                                                                                             "type":  "integer"
-                                                                                         }
-                                                                          }
-                                                       },
-                        "models.Order":  {
-                                             "type":  "object",
-                                             "properties":  {
-                                                                "amount":  {
-                                                                               "type":  "number"
-                                                                           },
-                                                                "created_at":  {
-                                                                                   "type":  "string"
-                                                                               },
-                                                                "id":  {
-                                                                           "type":  "string"
-                                                                       },
-                                                                "product_id":  {
-                                                                                   "type":  "string"
-                                                                               },
-                                                                "quantity":  {
-                                                                                 "type":  "integer"
-                                                                             },
-                                                                "status":  {
-                                                                               "type":  "string"
-                                                                           },
-                                                                "user_id":  {
-                                                                                "type":  "string"
-                                                                            }
-                                                            }
-                                         }
+{
+    "definitions": {
+        "main.AuthRequest": {
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "main.AuthResponse": {
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "main.AuthValidationResponse": {
+            "properties": {
+                "role": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "main.CreateOrderRequest": {
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "main.ProductRequest": {
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "stock": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "main.RefreshTokenRequest": {
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "main.authEmptyResponse": {
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "main.authTokenDataResponse": {
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/main.AuthResponse"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "main.authUserDataResponse": {
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "main.authValidationDataResponse": {
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/main.AuthValidationResponse"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "main.orderDataResponse": {
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/models.Order"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "main.orderEmptyResponse": {
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "main.orderListDataResponse": {
+            "properties": {
+                "data": {
+                    "items": {
+                        "$ref": "#/definitions/models.Order"
                     },
-    "securityDefinitions":  {
-
-                            },
-    "tags":  null
+                    "type": "array"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "main.productDataResponse": {
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/models.Product"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "main.productEmptyResponse": {
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "main.productListDataResponse": {
+            "properties": {
+                "data": {
+                    "items": {
+                        "$ref": "#/definitions/models.Product"
+                    },
+                    "type": "array"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "models.Order": {
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "models.Product": {
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "stock": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "models.User": {
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "info": {
+        "contact": {},
+        "description": "Combined API documentation for auth, product, and order services.",
+        "title": "Order Processing API"
+    },
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "description": "Login payload",
+                        "in": "body",
+                        "name": "payload",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.AuthRequest"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.authTokenDataResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/main.authEmptyResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.authEmptyResponse"
+                        }
+                    }
+                },
+                "summary": "Login user",
+                "tags": [
+                    "auth"
+                ]
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.authEmptyResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.authEmptyResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Logout user",
+                "tags": [
+                    "auth"
+                ]
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "description": "Refresh payload",
+                        "in": "body",
+                        "name": "payload",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.RefreshTokenRequest"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.authTokenDataResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/main.authEmptyResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.authEmptyResponse"
+                        }
+                    }
+                },
+                "summary": "Refresh token pair",
+                "tags": [
+                    "auth"
+                ]
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "description": "Register payload",
+                        "in": "body",
+                        "name": "payload",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.AuthRequest"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main.authUserDataResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/main.authEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/main.authEmptyResponse"
+                        }
+                    }
+                },
+                "summary": "Register user",
+                "tags": [
+                    "auth"
+                ]
+            }
+        },
+        "/auth/validate": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.authValidationDataResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.authEmptyResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Validate bearer token",
+                "tags": [
+                    "auth"
+                ]
+            }
+        },
+        "/orders": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.orderListDataResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.orderEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/main.orderEmptyResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "List orders",
+                "tags": [
+                    "order"
+                ]
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "description": "Idempotency key",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "description": "Order payload",
+                        "in": "body",
+                        "name": "payload",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.CreateOrderRequest"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main.orderDataResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/main.orderEmptyResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.orderEmptyResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Create order",
+                "tags": [
+                    "order"
+                ]
+            }
+        },
+        "/orders/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "description": "Order ID",
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.orderDataResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.orderEmptyResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/main.orderEmptyResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Get order by id",
+                "tags": [
+                    "order"
+                ]
+            }
+        },
+        "/products": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.productListDataResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.productEmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/main.productEmptyResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "List products",
+                "tags": [
+                    "product"
+                ]
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "description": "Product payload",
+                        "in": "body",
+                        "name": "payload",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.ProductRequest"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main.productDataResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/main.productEmptyResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.productEmptyResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Create product",
+                "tags": [
+                    "product"
+                ]
+            }
+        },
+        "/products/{id}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "description": "Product ID",
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.productEmptyResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.productEmptyResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/main.productEmptyResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Delete product by id",
+                "tags": [
+                    "product"
+                ]
+            },
+            "get": {
+                "parameters": [
+                    {
+                        "description": "Product ID",
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.productDataResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.productEmptyResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/main.productEmptyResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Get product by id",
+                "tags": [
+                    "product"
+                ]
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "description": "Product ID",
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "description": "Product payload",
+                        "in": "body",
+                        "name": "payload",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.ProductRequest"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.productDataResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/main.productEmptyResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.productEmptyResponse"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Update product by id",
+                "tags": [
+                    "product"
+                ]
+            }
+        }
+    },
+    "securityDefinitions": {},
+    "swagger": "2.0",
+    "tags": []
 }
