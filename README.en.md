@@ -1,33 +1,33 @@
 # Order Processing
 
-Backend microservices untuk alur auth, product, dan order, dengan API Gateway (KrakenD), observability, dan dokumentasi API otomatis.
+Microservices backend for auth, product, and order flows, with KrakenD API Gateway, observability stack, and automated API documentation checks.
 
-## Jalankan Lokal (Development)
+## Run Locally (Development)
 ```bash
 docker compose up --build -d
 ```
 
-Service utama:
+Main endpoints:
 - API Gateway: `http://localhost:8080`
 - Swagger UI: `http://localhost:8088`
 - Grafana: `http://localhost:3000`
 - Prometheus: `http://localhost:9090`
 - RabbitMQ Management: `http://localhost:15672`
 
-## API Docs dan Contract Automation
-Swagger di-generate dari annotation handler:
+## API Docs and Contract Automation
+Swagger is generated from handler annotations:
 - `service/auth/handler.go`
 - `service/product/handler.go`
 - `service/order/handler.go`
 
-Command yang dipakai sehari-hari:
+Day-to-day commands:
 ```bash
 make swagger
 make contract-check
 make test-services
 ```
 
-Untuk test per service:
+Run tests per service:
 ```bash
 go test ./service/auth/...
 go test ./service/product/...
@@ -35,31 +35,31 @@ go test ./service/order/...
 go test ./service/notification/...
 ```
 
-CI workflow (`.github/workflows/api-contract.yml`) menjalankan:
-1. Regenerate spec Swagger.
-2. Validasi tidak ada perubahan spec tak ter-commit (`git diff --exit-code docs/swagger`).
-3. Cek parity route KrakenD vs Swagger contract.
+CI workflow (`.github/workflows/api-contract.yml`) does:
+1. Regenerate Swagger specs.
+2. Fail if generated specs changed unexpectedly (`git diff --exit-code docs/swagger`).
+3. Validate KrakenD routes against Swagger contracts.
 
-Output Swagger:
+Swagger outputs:
 - `docs/swagger/auth/swagger.json`
 - `docs/swagger/product/swagger.json`
 - `docs/swagger/order/swagger.json`
-- `docs/swagger/swagger.json` (gabungan)
+- `docs/swagger/swagger.json` (combined)
 
-## Logging dan Observability
-Monitoring stack di development:
+## Logging and Observability
+Development observability stack includes:
 - Prometheus + Grafana
-- Loki + Promtail untuk log aggregation
+- Loki + Promtail for log aggregation
 
-Datasource Loki diprovision otomatis via:
+Loki datasource is provisioned automatically via:
 - `grafana/provisioning/datasources/loki.yml`
 
-Log dari `order_service` sudah structured JSON (termasuk `trace_id`, `correlation_id`, `event`) supaya lebih gampang tracing saat incident.
+`order_service` logs are structured JSON and include fields like `trace_id`, `correlation_id`, and `event` for easier incident tracing.
 
-## Deploy Production (Multi VPS)
-`docker-compose.yml` dipakai untuk development single-host.
+## Production Deployment (Multi-VPS)
+`docker-compose.yml` is intended for single-host development.
 
-Untuk production multi VPS, gunakan compose terpisah:
+For multi-VPS production, use split compose files:
 - `deploy/docker/docker-compose.prod.data.yml`
 - `deploy/docker/docker-compose.prod.auth.yml`
 - `deploy/docker/docker-compose.prod.product.yml`
@@ -67,7 +67,7 @@ Untuk production multi VPS, gunakan compose terpisah:
 - `deploy/docker/docker-compose.prod.gateway.yml`
 - `deploy/docker/docker-compose.prod.monitoring.yml`
 
-Contoh env per layer ada di:
+Example env files:
 - `deploy/docker/env/.env.data.example`
 - `deploy/docker/env/.env.auth.example`
 - `deploy/docker/env/.env.product.example`
@@ -75,7 +75,7 @@ Contoh env per layer ada di:
 - `deploy/docker/env/.env.gateway.example`
 - `deploy/docker/env/.env.monitoring.example`
 
-Contoh perintah deploy:
+Example deploy commands:
 ```bash
 docker compose --env-file deploy/docker/env/.env.data.example -f deploy/docker/docker-compose.prod.data.yml up --build -d
 docker compose --env-file deploy/docker/env/.env.auth.example -f deploy/docker/docker-compose.prod.auth.yml up --build -d
@@ -85,10 +85,10 @@ docker compose --env-file deploy/docker/env/.env.gateway.example -f deploy/docke
 docker compose --env-file deploy/docker/env/.env.monitoring.example -f deploy/docker/docker-compose.prod.monitoring.yml up --build -d
 ```
 
-Catatan production:
-- Hostname internal docker (`auth_service`, dst) tidak bisa dipakai lintas VPS.
-- Endpoint gateway bisa di-set via env:
+Production notes:
+- Docker internal hostnames (`auth_service`, etc.) do not work across VPS boundaries.
+- Gateway upstream hosts are configurable via env vars:
   - `AUTH_SERVICE_URL`
   - `PRODUCT_SERVICE_URL`
   - `ORDER_SERVICE_URL`
-- Scrape target Prometheus production ada di `prometheus.prod.yml`, sesuaikan dengan IP/private DNS aktual.
+- Production Prometheus scrape targets are defined in `prometheus.prod.yml`; adjust them to your real private IPs or DNS names.
