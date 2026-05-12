@@ -2,12 +2,12 @@
 
 Backend microservices untuk alur auth, product, dan order, dengan API Gateway (KrakenD), observability, dan dokumentasi API otomatis.
 
-## Jalankan Lokal (Development)
+## Lokal (Development)
 ```bash
 docker compose up --build -d
 ```
 
-Service utama:
+List Service:
 - API Gateway: `http://localhost:8080`
 - Swagger UI: `http://localhost:8088`
 - Grafana: `http://localhost:3000`
@@ -20,14 +20,14 @@ Swagger di-generate dari annotation handler:
 - `service/product/handler.go`
 - `service/order/handler.go`
 
-Command yang dipakai sehari-hari:
+List Command:
 ```bash
 make swagger
 make contract-check
 make test-services
 ```
 
-Untuk test per service:
+Untuk menjalankan Test per service:
 ```bash
 go test ./service/auth/...
 go test ./service/product/...
@@ -54,12 +54,12 @@ Monitoring stack di development:
 Datasource Loki diprovision otomatis via:
 - `grafana/provisioning/datasources/loki.yml`
 
-Log dari `order_service` sudah structured JSON (termasuk `trace_id`, `correlation_id`, `event`) supaya lebih gampang tracing saat incident.
+Log dari `order_service` sudah structured JSON (termasuk `trace_id`, `correlation_id`, `event`) untuk mempermudah tracing saat terjadi incident.
 
-## Deploy Production (Multi VPS)
+## Deploy
 `docker-compose.yml` dipakai untuk development single-host.
 
-Untuk production multi VPS, gunakan compose terpisah:
+Untuk production, gunakan compose terpisah masing-masing service:
 - `deploy/docker/docker-compose.prod.data.yml`
 - `deploy/docker/docker-compose.prod.auth.yml`
 - `deploy/docker/docker-compose.prod.product.yml`
@@ -85,7 +85,7 @@ docker compose --env-file deploy/docker/env/.env.gateway.example -f deploy/docke
 docker compose --env-file deploy/docker/env/.env.monitoring.example -f deploy/docker/docker-compose.prod.monitoring.yml up --build -d
 ```
 
-Catatan production:
+Catatan untuk production:
 - Hostname internal docker (`auth_service`, dst) tidak bisa dipakai lintas VPS.
 - Endpoint gateway bisa di-set via env:
   - `AUTH_SERVICE_URL`
