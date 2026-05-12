@@ -35,7 +35,6 @@ type AuthRequest struct {
 type AuthResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
-	Token        string `json:"token,omitempty"`
 }
 
 type RefreshTokenRequest struct {
@@ -106,7 +105,6 @@ func (s *AuthService) LoginUser(req AuthRequest) (*AuthResponse, error) {
 	return &AuthResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		Token:        accessToken,
 	}, nil
 }
 
@@ -170,7 +168,6 @@ func (s *AuthService) RefreshToken(req RefreshTokenRequest) (*AuthResponse, erro
 	return &AuthResponse{
 		AccessToken:  accessToken,
 		RefreshToken: newRefreshToken,
-		Token:        accessToken,
 	}, nil
 }
 
