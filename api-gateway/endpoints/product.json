@@ -7,7 +7,7 @@
     "backend": [
       {
         "encoding": "no-op",
-        "host": ["http://product_service:8082"],
+        "host": ["${PRODUCT_SERVICE_URL:-http://product_service:8082}"],
         "url_pattern": "/products"
       }
     ]
@@ -20,7 +20,7 @@
     "backend": [
       {
         "encoding": "no-op",
-        "host": ["http://product_service:8082"],
+        "host": ["${PRODUCT_SERVICE_URL:-http://product_service:8082}"],
         "url_pattern": "/products"
       }
     ]
@@ -33,7 +33,7 @@
     "backend": [
       {
         "encoding": "no-op",
-        "host": ["http://product_service:8082"],
+        "host": ["${PRODUCT_SERVICE_URL:-http://product_service:8082}"],
         "url_pattern": "/products/{id}"
       }
     ]
@@ -46,7 +46,7 @@
     "backend": [
       {
         "encoding": "no-op",
-        "host": ["http://product_service:8082"],
+        "host": ["${PRODUCT_SERVICE_URL:-http://product_service:8082}"],
         "url_pattern": "/products/{id}"
       }
     ]
@@ -59,7 +59,7 @@
     "backend": [
       {
         "encoding": "no-op",
-        "host": ["http://product_service:8082"],
+        "host": ["${PRODUCT_SERVICE_URL:-http://product_service:8082}"],
         "url_pattern": "/products/{id}"
       }
     ]

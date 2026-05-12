@@ -21,6 +21,7 @@ func main() {
 	if err != nil {
 		fatalf("read base config: %v", err)
 	}
+	rawBase = []byte(os.ExpandEnv(string(rawBase)))
 
 	var base config
 	if err := json.Unmarshal(rawBase, &base); err != nil {
@@ -43,6 +44,7 @@ func main() {
 		if err != nil {
 			fatalf("read endpoint file %s: %v", fileName, err)
 		}
+		rawEndpoints = []byte(os.ExpandEnv(string(rawEndpoints)))
 
 		var serviceEndpoints []any
 		if err := json.Unmarshal(rawEndpoints, &serviceEndpoints); err != nil {

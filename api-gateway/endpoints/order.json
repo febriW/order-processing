@@ -7,7 +7,7 @@
     "backend": [
       {
         "encoding": "no-op",
-        "host": ["http://order_service:8083"],
+        "host": ["${ORDER_SERVICE_URL:-http://order_service:8083}"],
         "url_pattern": "/orders"
       }
     ]
@@ -20,7 +20,7 @@
     "backend": [
       {
         "encoding": "no-op",
-        "host": ["http://order_service:8083"],
+        "host": ["${ORDER_SERVICE_URL:-http://order_service:8083}"],
         "url_pattern": "/orders"
       }
     ]
@@ -33,7 +33,7 @@
     "backend": [
       {
         "encoding": "no-op",
-        "host": ["http://order_service:8083"],
+        "host": ["${ORDER_SERVICE_URL:-http://order_service:8083}"],
         "url_pattern": "/orders/{id}"
       }
     ]

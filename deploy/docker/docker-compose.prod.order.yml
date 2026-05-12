@@ -1,0 +1,23 @@
+name: be-order-processing-order
+
+services:
+  order_service:
+    build:
+      context: ../..
+      dockerfile: service/order/Dockerfile
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      AUTH_VALIDATE_URL: ${AUTH_VALIDATE_URL}
+      REDIS_ADDR: ${REDIS_ADDR}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_DB: ${REDIS_DB:-0}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      OUTBOX_RELAY_INTERVAL: ${OUTBOX_RELAY_INTERVAL:-2s}
+      OUTBOX_CLAIM_TTL: ${OUTBOX_CLAIM_TTL:-30s}
+      OUTBOX_BASE_BACKOFF: ${OUTBOX_BASE_BACKOFF:-2s}
+      OUTBOX_MAX_BACKOFF: ${OUTBOX_MAX_BACKOFF:-2m}
+      OUTBOX_BATCH_SIZE: ${OUTBOX_BATCH_SIZE:-20}
+      OUTBOX_MAX_ATTEMPTS: ${OUTBOX_MAX_ATTEMPTS:-8}
+    ports:
+      - "${ORDER_PORT:-8083}:8083"
+    restart: unless-stopped
