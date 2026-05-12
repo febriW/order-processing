@@ -3,3 +3,6 @@
 .cache
 .modcache
 tmp
+.gocache
+.gomodcache
+.gopath
