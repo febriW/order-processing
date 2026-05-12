@@ -20,12 +20,10 @@ jobs:
           go-version-file: go.mod
 
       - name: Regenerate Swagger Specs
-        shell: pwsh
-        run: powershell -ExecutionPolicy Bypass -File scripts/generate-swagger.ps1
+        run: make swagger
 
       - name: Fail If Swagger Artifacts Changed
         run: git diff --exit-code docs/swagger
 
       - name: KrakenD Contract Check
-        shell: pwsh
-        run: powershell -ExecutionPolicy Bypass -File scripts/test-krakend-contract.ps1
+        run: make contract-check
