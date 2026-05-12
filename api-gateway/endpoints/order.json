@@ -1,0 +1,41 @@
+[
+  {
+    "endpoint": "/orders",
+    "method": "POST",
+    "input_headers": ["Authorization", "Idempotency-Key"],
+    "output_encoding": "no-op",
+    "backend": [
+      {
+        "encoding": "no-op",
+        "host": ["http://order_service:8083"],
+        "url_pattern": "/orders"
+      }
+    ]
+  },
+  {
+    "endpoint": "/orders",
+    "method": "GET",
+    "input_headers": ["Authorization"],
+    "output_encoding": "no-op",
+    "backend": [
+      {
+        "encoding": "no-op",
+        "host": ["http://order_service:8083"],
+        "url_pattern": "/orders"
+      }
+    ]
+  },
+  {
+    "endpoint": "/orders/{id}",
+    "method": "GET",
+    "input_headers": ["Authorization"],
+    "output_encoding": "no-op",
+    "backend": [
+      {
+        "encoding": "no-op",
+        "host": ["http://order_service:8083"],
+        "url_pattern": "/orders/{id}"
+      }
+    ]
+  }
+]

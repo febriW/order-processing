@@ -1,0 +1,67 @@
+[
+  {
+    "endpoint": "/products",
+    "method": "POST",
+    "input_headers": ["Authorization"],
+    "output_encoding": "no-op",
+    "backend": [
+      {
+        "encoding": "no-op",
+        "host": ["http://product_service:8082"],
+        "url_pattern": "/products"
+      }
+    ]
+  },
+  {
+    "endpoint": "/products",
+    "method": "GET",
+    "input_headers": ["Authorization"],
+    "output_encoding": "no-op",
+    "backend": [
+      {
+        "encoding": "no-op",
+        "host": ["http://product_service:8082"],
+        "url_pattern": "/products"
+      }
+    ]
+  },
+  {
+    "endpoint": "/products/{id}",
+    "method": "GET",
+    "input_headers": ["Authorization"],
+    "output_encoding": "no-op",
+    "backend": [
+      {
+        "encoding": "no-op",
+        "host": ["http://product_service:8082"],
+        "url_pattern": "/products/{id}"
+      }
+    ]
+  },
+  {
+    "endpoint": "/products/{id}",
+    "method": "PUT",
+    "input_headers": ["Authorization"],
+    "output_encoding": "no-op",
+    "backend": [
+      {
+        "encoding": "no-op",
+        "host": ["http://product_service:8082"],
+        "url_pattern": "/products/{id}"
+      }
+    ]
+  },
+  {
+    "endpoint": "/products/{id}",
+    "method": "DELETE",
+    "input_headers": ["Authorization"],
+    "output_encoding": "no-op",
+    "backend": [
+      {
+        "encoding": "no-op",
+        "host": ["http://product_service:8082"],
+        "url_pattern": "/products/{id}"
+      }
+    ]
+  }
+]
