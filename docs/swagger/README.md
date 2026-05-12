@@ -24,7 +24,7 @@ docker compose up --build -d
 
 ## Notes
 - Route/parameter docs live in:
-  - `service/auth/swag_docs.go`
+  - `service/auth/handler.go` (inline handler annotations)
   - `service/product/swag_docs.go`
   - `service/order/swag_docs.go`
 - If routes change in handlers, update these doc annotations, then regenerate specs.
