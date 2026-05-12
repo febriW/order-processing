@@ -24,7 +24,7 @@ func NewAuthRepository(databaseURL string) *AuthRepository {
 
 	_, err = db.Exec(context.Background(), `CREATE TABLE IF NOT EXISTS users (
         id VARCHAR(255) PRIMARY KEY, email VARCHAR(255) UNIQUE,
-        password VARCHAR(255), role VARCHAR(50) NOT NULL DEFAULT 'customer'
+        password VARCHAR(255), role VARCHAR(50) NOT NULL DEFAULT 'basic'
     )`)
 	if err != nil {
 		log.Fatalf("Could not create users table: %v\n", err)
@@ -35,15 +35,8 @@ func NewAuthRepository(databaseURL string) *AuthRepository {
 
 func (r *AuthRepository) CreateUser(user models.User) error {
 	ctx := context.Background()
-	sqlStatement := `INSERT INTO users (id, email, password_hash) VALUES ($1, $2, $3)`
-	_, err := r.db.Exec(ctx, sqlStatement, user.ID, user.Email, user.Password)
-	if err != nil {
-		return err
-	}
-
-	if strings.Contains(user.Email, "admin@") {
-		_, err = r.db.Exec(ctx, "UPDATE users SET role = 'admin' WHERE email = $1", user.Email)
-	}
+	sqlStatement := `INSERT INTO users (id, email, password, role) VALUES ($1, $2, $3, $4)`
+	_, err := r.db.Exec(ctx, sqlStatement, user.ID, user.Email, user.Password, roleForEmail(user.Email))
 	return err
 }
 
@@ -51,7 +44,7 @@ func (r *AuthRepository) GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
 	ctx := context.Background()
 
-	err := pgxscan.Get(ctx, r.db, &user, `SELECT id, email, role FROM users WHERE email=$1`, email)
+	err := pgxscan.Get(ctx, r.db, &user, `SELECT id, email, password, role FROM users WHERE email=$1`, email)
 
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -60,4 +53,14 @@ func (r *AuthRepository) GetUserByEmail(email string) (*models.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func roleForEmail(email string) string {
+	if strings.Contains(email, "superadmin@") {
+		return models.RoleSuperAdmin
+	}
+	if strings.Contains(email, "admin@") {
+		return models.RoleAdmin
+	}
+	return models.RoleBasicUser
 }

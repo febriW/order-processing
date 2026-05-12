@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.21-alpine AS builder
+FROM golang:1.25.3-alpine AS builder
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ COPY . .
 
 # building
 WORKDIR /app/service/auth
-RUN go build -o auth-service .
+RUN go build -trimpath -ldflags="-s -w" -o auth-service .
 
 # Final stage
 FROM gcr.io/distroless/static:nonroot
@@ -23,6 +23,6 @@ COPY --from=builder /app/service/auth/auth-service .
 
 USER nonroot:nonroot
 
-EXPOSE 8080
+EXPOSE 8081
 
 ENTRYPOINT ["/auth-service"]
