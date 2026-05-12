@@ -1,0 +1,31 @@
+name: API Contract
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  verify-api-contract:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Regenerate Swagger Specs
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File scripts/generate-swagger.ps1
+
+      - name: Fail If Swagger Artifacts Changed
+        run: git diff --exit-code docs/swagger
+
+      - name: KrakenD Contract Check
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File scripts/test-krakend-contract.ps1
